@@ -32,7 +32,7 @@ class CustomDataset(Dataset):
             image_series = self.transform(image_series)
 
 
-        return image_series, (torch.rand_like(image_series) > 0.95) # TODO: Add labels
+        return image_series, (torch.rand_like(image_series[2,:,:]).unsqueeze(0) > 0.95) # TODO: Add labels
 
 upper_lower = (100, 300)
 
