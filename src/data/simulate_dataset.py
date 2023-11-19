@@ -67,8 +67,8 @@ def generate_images(num_images=5, x_dim=100, y_dim=100, num_gaussians=100, gauss
         #sim_domain.unsqueeze(0)
         #positions_list.append(positions)
     #print(positions_list)
-    dataset.append((sim_domain_plustime,binary_mask))
-    return dataset
+    binary_mask = binary_mask.unsqueeze(0)
+    return sim_domain_plustime, binary_mask
 
 
 num_images = 5

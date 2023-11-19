@@ -24,6 +24,7 @@ class CustomDataset(Dataset):
         # Load images
         for i in range(0, 5):
             img = lv.read_buffer(self.root + '/B' + str(idx + i + 1).zfill(5) + '.im7')
+            img = lv.read_buffer(self.root + '/B' + str(idx + i + 1).zfill(5) + '.im7')
             img = torch.from_numpy(img[0].as_masked_array().data) # Currently hardcoded to camera 1
 
             image_series[i, :, :] = img
@@ -32,7 +33,7 @@ class CustomDataset(Dataset):
             image_series = self.transform(image_series)
 
 
-        return image_series, ((torch.rand_like(image_series[2,:,:]).unsqueeze(0) > 0.95)*1.0) # TODO: Add labels
+        return image_series, ((torch.rand_like(image_series[2,:,:]).unsqueeze(0) > 0.95)*1.0) * 1.0 # TODO: Add labels
 
 upper_lower = (100, 300)
 
