@@ -22,32 +22,33 @@ def gaussian(pos, mu, params):
     A, sigma = params
     return A * torch.exp(-((x - x0) ** 2 + (y - y0) ** 2) / (2 * sigma ** 2))
 
-def generate_images(num_images=5, x_dim=100, y_dim=100, num_gaussians=100, gauss_params=(50, 1)):
+def generate_images(num_images=5, x_dim=100, y_dim=100, num_gaussians=100, gauss_params=(60, 1), meanflow=15):
     dataset = []
     images = []
     positions_list = []
     gauss_masks = []
-    #flowrate = 5+max(min(random.gauss(0, 1), 2), -2)
-    #Angle = random.uniform(0, 2 * np.pi)
-    #flowX = flowrate * np.cos(Angle)
-    #flowY = flowrate * np.sin(Angle)
-    #Init_positions = torch.zeros((2, num_gaussians))
-    #Init_positions[0, :] = torch.rand(num_gaussians) * x_dim
-    #Init_positions[1, :] = torch.rand(num_gaussians) * y_dim
+    flowrate = meanflow + max(min(np.random.normal(0, 1), 2), -2)
+    Angle = np.random.uniform(0, 2 * np.pi)
+    flowX = flowrate * np.cos(Angle)
+    flowY = flowrate * np.sin(Angle)
+    positions = torch.zeros((5, 2, num_gaussians))
+    positions[0, 0, :] = torch.rand(num_gaussians) * (x_dim+meanflow*(num_images+1))-meanflow*(num_images+1)/2
+    positions[0, 1, :] = torch.rand(num_gaussians) * (y_dim+meanflow*(num_images+1))-meanflow*(num_images+1)/2
     sim_domain_plustime = torch.zeros((num_images ,x_dim, y_dim ))
     Label_domain = torch.zeros((x_dim, y_dim ))
     for i in range(num_images):
         sim_domain = torch.zeros((x_dim, y_dim))
-        positions = torch.zeros((2, num_gaussians))
-        positions[0, :] = torch.randint(0, x_dim, (num_gaussians,))
-        positions[1, :] = torch.randint(0, y_dim, (num_gaussians,))
+        #positions = torch.zeros((2, num_gaussians))
+        positions[i, 0, :] = positions[0, 0, :]+flowX*i
+        positions[i, 1, :] = positions[0, 1, :]+flowY*i
         #print(positions)
         x = torch.arange(x_dim)
         y = torch.arange(y_dim)
         x, y = torch.meshgrid(x, y)
 
         for n in range(num_gaussians):
-            sim_domain += gaussian((x, y), positions[:, n], gauss_params).t()
+            gauss_paramsrnd = (gauss_params[0] + max(np.random.normal(0, 30), -60), gauss_params[1]+ max(np.random.normal(0, 0.5), -1))
+            sim_domain += gaussian((x, y), positions[i, :, n], gauss_params).t()
 
         # Store the images and masks as tensors with 1 channel
         #noise = torch.normal(mean=0., std=noise_stddev, size=sim_domain.shape)
