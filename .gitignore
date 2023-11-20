@@ -80,7 +80,7 @@ target/
 *.im7
 *.tif
 *.tiff
-*.npy
+#*.npy
 /env/
 
 # Mac OS-specific storage files
