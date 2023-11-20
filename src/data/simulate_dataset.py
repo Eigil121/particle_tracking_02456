@@ -73,7 +73,7 @@ def generate_images(num_images=5, x_dim=100, y_dim=100, num_gaussians=100, gauss
 
 
 num_images = 5
-generate_data = lambda: generate_images(num_images=num_images, x_dim=100, y_dim=100, num_gaussians=100, gauss_params=(50, 1))
+generate_data = lambda: generate_images(num_images=num_images, x_dim=100, y_dim=100, num_gaussians=100, gauss_params=(50, 1), meanflow=15)
 
 class CustomDataset(Dataset):
     def __init__(self, root, transform=None):
