@@ -4,7 +4,7 @@ from torch.utils.data import Dataset, DataLoader
 
 
 
-CamDataNormalizedCumalative = torch.from_numpy(np.load('CamDataNormalizedCumalative.npy'))
+CamDataNormalizedCumalative = torch.from_numpy(np.load('src/data/CamDataNormalizedCumalative.npy'))
 
 def rdNoise(CamDataNormalizedCumalative, Shape):
     if isinstance(Shape, int):
