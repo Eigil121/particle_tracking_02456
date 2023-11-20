@@ -76,7 +76,11 @@ target/
 .ipynb_checkpoints/
 
 # exclude data from source control by default
-/data/
+*.png
+*.im7
+*.tif
+*.tiff
+*.npy
 /env/
 
 # Mac OS-specific storage files
