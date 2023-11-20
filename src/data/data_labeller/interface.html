@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Import</title>
+    <style>
+        #canvas {
+            border: 1px solid #bd1c1c;
+        }
+    </style>
+</head>
+<body>
+    <input type="file" id="imageInput" accept="image/*">
+    <canvas id="canvas" width="400" height="400"></canvas>
+
+    <script>
+        document.getElementById('imageInput').addEventListener('change', handleImage);
+
+        function handleImage(event) {
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            
+            const input = event.target;
+            const file = input.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = new Image();
+                    img.onload = function () {
+                        context.clearRect(0, 0, canvas.width, canvas.height);
+                        context.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+</html>
