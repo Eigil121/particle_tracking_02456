@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<JobSequence>
+	<JobItem Index="0">
+		<SourceIndex>-1</SourceIndex>
+		<Job Identifier="SetProcessing">
+			<Enabled>true</Enabled>
+			<par id="INT" name="StartIndex">
+				<desc>Start index</desc>
+				<value>-1</value>
+			</par>
+			<par id="INT" name="EndIndex">
+				<desc>End index</desc>
+				<value>-1</value>
+			</par>
+			<par id="INT" name="Increment">
+				<desc>Increment</desc>
+				<value>-1</value>
+			</par>
+			<par id="INT" name="FullRange">
+				<desc>Full range</desc>
+				<value>1</value>
+			</par>
+			<StoreMode>4</StoreMode>
+			<StoreName>ImgPreproc(no_subtract)</StoreName>
+			<SetOp Identifier="ImagePreprocessing">
+				<parameter>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;root class="ImagePreprocessing" version="1"&gt;
+	&lt;parameter class="ImagePreprocessingParameter" version="2"&gt;
+		&lt;timeFilterParameter class="TimeFilterParameter" version="1"&gt;
+			&lt;apply class="bool" value="false" /&gt;
+			&lt;kind class="int32" value="0" /&gt;
+			&lt;length class="uint32_t" value="3" /&gt;
+			&lt;formatBeforeButterworth class="int32" value="2" /&gt;
+			&lt;formatAfterButterworth class="int32" value="0" /&gt;
+			&lt;useFrameFactors class="bool" value="false" /&gt;
+			&lt;framesCount class="uint32_t" value="4" /&gt;
+			&lt;frameFactor0 class="double" value="1" /&gt;
+			&lt;frameFactor1 class="double" value="1" /&gt;
+			&lt;frameFactor2 class="double" value="1" /&gt;
+			&lt;frameFactor3 class="double" value="1" /&gt;
+		&lt;/timeFilterParameter&gt;
+		&lt;maskParameter class="MaskingParameter" version="1"&gt;
+			&lt;Apply class="bool" value="false" /&gt;
+			&lt;Masks /&gt;
+		&lt;/maskParameter&gt;
+		&lt;useSubtractSlidingMinimum class="bool" value="false" /&gt;
+		&lt;subtractSlidingMinimumLength class="uint32_t" value="3" /&gt;
+		&lt;useNormalizeWithLocalAverage class="bool" value="false" /&gt;
+		&lt;localAverageLength class="uint32_t" value="300" /&gt;
+		&lt;localAverageMode class="int32" value="1" /&gt;
+		&lt;localAverageSummandCount class="uint32_t" value="3" /&gt;
+		&lt;useNormalizeAllFrames class="bool" value="true" /&gt;
+		&lt;useSlidingGaussian class="bool" value="false" /&gt;
+		&lt;slidingGaussianLength class="double" value="1.2" /&gt;
+		&lt;useSharpening class="bool" value="false" /&gt;
+		&lt;useSubtractConstant class="bool" value="true" /&gt;
+		&lt;subtractConstantValue class="uint32_t" value="0" /&gt;
+		&lt;useMultiplyWithFactor class="bool" value="false" /&gt;
+		&lt;multiplyWithFactorValue class="float" value="25" /&gt;
+	&lt;/parameter&gt;
+&lt;/root&gt;</parameter>
+			</SetOp>
+		</Job>
+	</JobItem>
+</JobSequence>

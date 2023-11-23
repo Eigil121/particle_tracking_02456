@@ -17,8 +17,8 @@ clip_image = lambda img: np.clip(img, 0, 255).astype(np.uint8)
 for im7_img in tqdm(glob.glob(im7_dir + '/B*.im7')):
 
     buffer = lv.read_buffer(im7_img)
-    filename = im7_img.split('/')[-1].split('.')[0]
-
+    filename = im7_img[-10:]
+    print(glob.glob(im7_dir + '/B*.im7'))
     for camera in range(4):
         img = buffer[camera].as_masked_array().data
         img = crop_image(img, camera)
