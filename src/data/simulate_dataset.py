@@ -1,10 +1,11 @@
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
+import os
 
-
-
-CamDataNormalizedCumalative = torch.from_numpy(np.load('CamDataNormalizedCumalative.npy'))
+#load the data with os
+CamDataNormalizedCumalative = torch.from_numpy(np.load(os.path.join(os.getcwd(), 'data', 'CamDataNormalizedCumalative.npy')))
+#CamDataNormalizedCumalative = torch.from_numpy(np.load('CamDataNormalizedCumalative.npy'))
 
 def rdNoise(CamDataNormalizedCumalative, Shape):
     if isinstance(Shape, int):
@@ -60,11 +61,11 @@ def generate_images(num_images=5, x_dim=100, y_dim=100, num_gaussians=100, gauss
         # Store the images and masks as tensors with 1 channel
         sim_domain_plustime[i,:,:] = sim_domain.unsqueeze(0) + 1.0*noise
         if i == round(num_images/2):
-            print(i)
+            #print(i)
             Label_domain = sim_domain.unsqueeze(0)
             threshold = 20
             binary_mask = (sim_domain >= threshold).float()
-            print(binary_mask)
+            #print(binary_mask)
         #sim_domain.unsqueeze(0)
         #positions_list.append(positions)
     #print(positions_list)
