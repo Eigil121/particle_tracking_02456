@@ -80,6 +80,7 @@ target/
 *.im7
 *.tif
 *.tiff
+*.pth
 #*.npy
 /env/
 
