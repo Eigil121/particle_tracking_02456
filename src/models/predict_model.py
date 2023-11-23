@@ -52,6 +52,6 @@ if __name__ == "__main__":
 
     print(outputs.shape)
 
-    #plot the output of the first image
+    #plot the output of the first image in the batch
     plt.figure()
     plt.imshow(outputs[0].numpy(), cmap='gray')    
