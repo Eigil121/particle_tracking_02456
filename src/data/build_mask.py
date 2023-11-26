@@ -92,7 +92,7 @@ def save_mask(mask, batch, camera, image_nr):
     image = Image.fromarray(mask.astype(np.uint8))
 
     # Construct the path to the data
-    path = f"data/interim/batch{batch}/masks/cam{camera}_image{image_nr}.png"
+    path = f"data/interim/masks/batch{batch}cam{camera}_image{image_nr}.png"
 
     # Save the image as a BMP file
     image.save(path)

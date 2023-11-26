@@ -52,20 +52,19 @@ class Particle_dataset(Dataset):
 
         return image_series, ((torch.rand_like(image_series[2,:,:]).unsqueeze(0) > 0.95)*1.0) * 1.0 # TODO: Add labels
 
-"""
-upper_lower = (100, 300)
 
-cutout_transform = transforms.Lambda(lambda x: x[:, upper_lower[0]:upper_lower[1], :]) 
+Particle_dataset_inference = Particle_dataset
 
-# Define a transform if needed
-transform = transforms.Compose([
-    cutout_transform
-])
-"""
 
-def load_dataset(data_dir, batch_size):
-    # Create an instance of your custom dataset
-    custom_dataset = Particle_dataset(data_dir, transform=None)
+
+
+def load_dataset(data_dir, batch_size, dataset_type = "supervised"):
+
+    if dataset_type == "inference":
+        dataset = Particle_dataset_inference(data_dir, transform=None)
+    
+    else:
+        custom_dataset = Particle_dataset(data_dir, transform=None)
 
     # Create a DataLoader for your custom dataset
     custom_dataloader = DataLoader(custom_dataset, batch_size=batch_size, shuffle=True)
@@ -74,8 +73,12 @@ def load_dataset(data_dir, batch_size):
 
 if __name__ == "__main__":
 
-    import matplotlib
-    matplotlib.use('TkAgg') 
+    # For the Linux guy whos mpl backend is not working
+    import platform
+    if platform.system() == 'Linux':
+        import matplotlib
+        matplotlib.use('TkAgg') 
+
     # Test the dataset
     data_dir = 'data/interim/'
     data_loader = load_dataset(data_dir, 3)
@@ -85,9 +88,9 @@ if __name__ == "__main__":
         print(labels.shape)
         
         # Plot the first image
-        plt.imshow(images[0, 2, :, :].numpy(), cmap='gray')
-        plt.show()
+        #plt.imshow(images[0, 2, :, :].numpy(), cmap='gray')
+        #plt.show()
 
         
-        break
+        
 

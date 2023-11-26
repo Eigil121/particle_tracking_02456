@@ -8,8 +8,10 @@ im7_dir = 'data/raw/batch1/'
 
 target_dir = 'data/interim/batch1/'
 
+# Crop the images to remove areas with no particles
 camera_crops = {0: (100, 300), 1: (100, 300), 2: (300,500), 3:(300,500)}
 
+# Pre-processing functions
 crop_image = lambda img, camera: img[camera_crops[camera][0]:camera_crops[camera][1], :]
 clip_image = lambda img: np.clip(img, 0, 255).astype(np.uint8)
 
