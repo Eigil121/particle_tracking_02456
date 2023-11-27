@@ -67,10 +67,10 @@ def rle_to_mask(rle: List[int], height: int, width: int) -> np.array:
     return image
 
 
-def build_mask(json_path):
+def build_mask(json_path, mask_nr=0):
 
     with open(json_path, 'r') as f:
-        json_file = json.load(f)[0]
+        json_file = json.load(f)[mask_nr]
     
     json_annotations = json_file['annotations'][0]["result"]
 
@@ -107,7 +107,8 @@ if __name__ == "__main__":
     batch = 1
     camera = 0
     image_nr = 2
+    mask_nr = 0
 
-    mask = build_mask(json_path)
+    mask = build_mask(json_path, mask_nr=mask_nr)
 
     save_mask(mask, batch, camera, image_nr)
