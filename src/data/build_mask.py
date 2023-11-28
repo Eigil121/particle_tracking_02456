@@ -81,10 +81,8 @@ def build_mask(json_path, mask_nr=0):
     for annotation in json_annotations:
         partial_annotation = annotation["value"]["rle"]
         partial_mask = rle_to_mask(partial_annotation, height, width)
-        mask += partial_mask
+        mask[partial_mask > 0] = 255
     
-    # Clean mask for values different than 0 and 255
-    mask[mask != 255] = 0
     return mask
 
 def save_mask(mask, batch, camera, image_nr):
@@ -92,7 +90,7 @@ def save_mask(mask, batch, camera, image_nr):
     image = Image.fromarray(mask.astype(np.uint8))
 
     # Construct the path to the data
-    path = f"data/interim/masks/batch{batch}cam{camera}_image{image_nr}.png"
+    path = f"data/interim/masks/batch{batch}_cam{camera}_image{image_nr}.png"
 
     # Save the image as a BMP file
     image.save(path)
@@ -104,11 +102,16 @@ if __name__ == "__main__":
 
     json_path = "src/data/data_labeller/project-2-at-2023-11-20-14-43-f6f813f4.json"
 
-    batch = 1
-    camera = 0
-    image_nr = 2
-    mask_nr = 0
+    json_path = "C:/Users/eigil/Desktop/Great escape/school/particle_tracking_02456/src/data/data_labeller/eigil_andreas(ufærdig).json"
+    batch = "2"
+    camera = "3"
+    image_nr = "150"
+    mask_nr = 1
 
     mask = build_mask(json_path, mask_nr=mask_nr)
 
     save_mask(mask, batch, camera, image_nr)
+
+    import matplotlib.pyplot as plt
+    plt.imshow(mask)
+    plt.show()

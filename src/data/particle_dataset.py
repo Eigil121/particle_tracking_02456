@@ -6,7 +6,7 @@ from torch.utils.data import Dataset, DataLoader
 import glob
 from torchvision import transforms
 import os
-
+import re
 
 class Particle_dataset(Dataset):
     def __init__(self, data_dir, transform=None):
@@ -53,6 +53,57 @@ class Particle_dataset(Dataset):
         return image_series, ((torch.rand_like(image_series[2,:,:]).unsqueeze(0) > 0.95)*1.0) * 1.0 # TODO: Add labels
 
 
+
+class Particle_dataset_supervised(Dataset):
+    def __init__(self, data_dir, transform=None):
+        self.transform = transform
+        
+        mask_paths = glob.glob("data/interim/masks/batch*cam*_image*.png" ) # Find all masks
+        pattern = re.compile(r"batch(\d+)_cam(\d+)_image(\d+).png") # Define pattern
+
+        self.image_info = []
+        for mask_path in mask_paths:
+            match = pattern.search(mask_path)
+            if match:
+                batch, camera, image = match.groups()
+                self.image_info.append({"batch": batch, "camera": camera, "image": image, "mask_path": mask_path})
+
+    def __len__(self):
+        return len(self.image_info)
+    
+
+    def __getitem__(self, idx):
+        # Generate your data here
+        # For example, let's generate a random tensor as data
+
+        sample_info = self.image_info[idx]
+
+        # Load images
+        for i in range(0, 5):
+            # Load png as torch tensor
+            img = plt.imread("data/interim/batch" + sample_info["batch"] + "/cam" + sample_info["camera"] + "/B" + str(int(sample_info["image"]) + i - 2).zfill(5) + ".png")
+            
+            if i == 0:
+                image_series = torch.zeros(5, img.shape[0], img.shape[1])
+
+            img = torch.from_numpy(img)
+            img = img.unsqueeze(0)
+
+            image_series[i, :, :] = img
+
+        # Read mask as torch tensor
+        mask = plt.imread(sample_info["mask_path"])
+        mask = torch.from_numpy(mask)//255
+        mask = mask.unsqueeze(0)
+
+        if self.transform:
+            image_series = self.transform(image_series)
+            mask = self.transform(mask)
+
+
+        return image_series, mask
+
+
 Particle_dataset_inference = Particle_dataset
 
 
@@ -62,12 +113,15 @@ def load_dataset(data_dir, batch_size, dataset_type = "supervised"):
 
     if dataset_type == "inference":
         dataset = Particle_dataset_inference(data_dir, transform=None)
+
+    elif dataset_type == "supervised":
+        dataset = Particle_dataset_supervised(data_dir, transform=None)
     
     else:
-        custom_dataset = Particle_dataset(data_dir, transform=None)
+        dataset = Particle_dataset(data_dir, transform=None)
 
     # Create a DataLoader for your custom dataset
-    custom_dataloader = DataLoader(custom_dataset, batch_size=batch_size, shuffle=True)
+    custom_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
 
     return custom_dataloader
 
@@ -81,7 +135,7 @@ if __name__ == "__main__":
 
     # Test the dataset
     data_dir = 'data/interim/'
-    data_loader = load_dataset(data_dir, 3)
+    data_loader = load_dataset(data_dir, 1, dataset_type = "supervised")
 
     for i, (images, labels) in enumerate(data_loader):
         print(images.shape)
