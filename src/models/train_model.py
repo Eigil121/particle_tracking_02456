@@ -6,25 +6,41 @@ import numpy as np
 import os
 from src.data.particle_dataset import load_dataset as load_dataset_real
 from src.data.simulate_dataset import load_dataset as load_dataset_sim, generate_data 
-from architectures import SimpleCNN, ImprovedCNN
+from architectures import *
 import argparse
 import yaml
 
-def load_model(model_name, architecture):
-    if architecture == 'SimpleCNN':
-        model = SimpleCNN()
-    elif architecture == 'ImprovedCNN':
-        model = ImprovedCNN()
+def load_dataset(batch_size, dataset_name):
+    
+    # Load dataset
+    if dataset_name == 'simulate':
+        data_loader = load_dataset_sim(batch_size)
+    
+    elif dataset_name == 'inference':
+        data_loader = load_dataset_real(batch_size, dataset_type="inference")
+    
+    elif dataset_name == 'supervised':
+        data_loader = load_dataset_real(batch_size, dataset_type="supervised")
+    
     else:
+        raise ValueError('dataset type not recognized')
+    
+    return data_loader
+
+def load_model(model_name, architecture):
+    try:
+        model = eval(architecture + "()")
+
+    except:
         raise ValueError('model architecture not recognized')
 
     if model_name + '.pth' in os.listdir('models'):
         state_dict = torch.load("models/" + model_name + '.pth')
         model.load_state_dict(state_dict)
-        print(f"Model '{model_name}' loaded")
+        print(f"Model '{model_name}' loaded with architecture '{architecture}'")
     
     else:
-        print(f"New model, '{model_name}', created")
+        print(f"New model, '{model_name}', created with architecture '{architecture}'")
 
     return model
 
@@ -115,18 +131,11 @@ def main():
     # Load the yaml configuration file
     experiment_configs = yaml.load(open("src/experiments/"+ args.config + ".yaml"), Loader=yaml.FullLoader)
     
+    dataset_name = experiment_configs['data']['dataset']
+    batch_size = experiment_configs['data']['batch_size']
+
     # Load dataset
-    if experiment_configs['data']['dataset'] == 'simulate':
-        data_loader = load_dataset_sim(experiment_configs['data']['batch_size'])
-    
-    elif experiment_configs['data']['dataset'] == 'inference':
-        data_loader = load_dataset_real(experiment_configs['data']['batch_size'], dataset_type = "inference")
-    
-    elif experiment_configs['data']['dataset'] == 'supervised':
-        data_loader = load_dataset_real(experiment_configs['data']['batch_size'], dataset_type = "supervised")
-    
-    else:
-        raise ValueError('dataset type not recognized')
+    data_loader = load_dataset(batch_size, dataset_name)
 
     # Load model
     model = load_model(experiment_configs['model']['model_name'], experiment_configs['model']['architecture'])
@@ -146,18 +155,34 @@ def main():
     plt.show()
 
     # Save model
-    if experiment_configs['model']['save_name'] == None or experiment_configs['model']['savename'] == "None":
+    if experiment_configs['model']['savename'] == None or experiment_configs['model']['savename'] == "None":
         save_name = experiment_configs['model']['model_name']
     else:
         save_name = experiment_configs['model']['savename']
 
     save_model(model, save_name)
-
-    #visualize the model output for a new image
-    sample_image, sample_mask = generate_data()
     
-    visualize_output(model, sample_image, sample_mask)
+    #visualize_output(model, sample_image, sample_mask)
+    if experiment_configs['visualize']["plot"]:
+        from src.visualization.visualize import visualize_output
 
+        dataset_name = experiment_configs['visualize']['dataset']
+        batch_size = experiment_configs['visualize']['n_max']
+
+        # Load dataset
+        data_loader = load_dataset(batch_size, dataset_name)
+
+        sample_image, sample_mask = next(iter(data_loader))
+        model.eval()
+
+        with torch.no_grad():
+            output = model(sample_image)
+
+        n_max = experiment_configs['visualize']['n_max']
+        visualize_output(sample_image, sample_mask, output, nmax=batch_size)
+
+
+        
 
 if __name__ == "__main__":
     main()

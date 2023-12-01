@@ -9,7 +9,7 @@ import os
 import re
 
 class Particle_dataset_inference(Dataset):
-    def __init__(self, data_dir, transform=None):
+    def __init__(self, transform=None):
         self.transform = transform
 
     def __len__(self):
@@ -55,7 +55,7 @@ class Particle_dataset_inference(Dataset):
 
 
 class Particle_dataset_supervised(Dataset):
-    def __init__(self, data_dir, transform=None):
+    def __init__(self, transform=None):
         self.transform = transform
         
         mask_paths = glob.glob("data/interim/masks/batch*cam*_image*.png" ) # Find all masks
@@ -95,7 +95,7 @@ class Particle_dataset_supervised(Dataset):
 
         # Read mask as torch tensor
         mask = plt.imread(sample_info["mask_path"])
-        mask = torch.from_numpy(mask)//255
+        mask = torch.from_numpy(mask)
         mask = mask.unsqueeze(0)
 
         if self.transform:
@@ -132,15 +132,19 @@ if __name__ == "__main__":
 
     # Test the dataset
     data_dir = 'data/interim/'
-    data_loader = load_dataset(data_dir, 1, dataset_type = "supervised")
+    data_loader = load_dataset(1, dataset_type = "supervised")
 
     for i, (images, labels) in enumerate(data_loader):
         print(images.shape)
         print(labels.shape)
         
         # Plot the first image
-        #plt.imshow(images[0, 2, :, :].numpy(), cmap='gray')
-        #plt.show()
+        plt.imshow(images[0, 2, :, :].numpy(), cmap='gray')
+        plt.show()
+
+        # Plot the first mask
+        plt.imshow(labels[0, 0, :, :].numpy(), cmap='gray')
+        plt.show()
 
         
         

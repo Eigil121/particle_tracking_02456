@@ -135,7 +135,7 @@ class CustomDataset(Dataset):
         pass
 
     def __len__(self):
-        return 100 # index by middle image, remove 2 images from start and end
+        return 10 # index by middle image, remove 2 images from start and end
 
     def __getitem__(self, idx):
         # Generate your data here

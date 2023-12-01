@@ -18,3 +18,7 @@ model:
 training:
   epochs: 1
 
+visualize:
+  plot: True
+  dataset: supervised
+  n_max: 1
