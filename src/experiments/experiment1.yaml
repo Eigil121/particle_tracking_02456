@@ -10,7 +10,7 @@ data:
 # Model configuration
 model:
   model_name: "CNN1"
-  architecture: SimpleCNN # SimpleCNN
+  architecture: SimpleCNN # SimpleCNN, ImprovedCNN
   learning_rate: 0.001
   savename: None
 

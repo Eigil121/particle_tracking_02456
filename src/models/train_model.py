@@ -6,13 +6,15 @@ import numpy as np
 import os
 from src.data.particle_dataset import load_dataset as load_dataset_real
 from src.data.simulate_dataset import load_dataset as load_dataset_sim, generate_data 
-from architectures import SimpleCNN
+from architectures import SimpleCNN, ImprovedCNN
 import argparse
 import yaml
 
 def load_model(model_name, architecture):
     if architecture == 'SimpleCNN':
         model = SimpleCNN()
+    elif architecture == 'ImprovedCNN':
+        model = ImprovedCNN()
     else:
         raise ValueError('model architecture not recognized')
 
