@@ -7,7 +7,8 @@ import os
 #from torch.utils.data import 
 from src.data.particle_dataset import load_dataset as load_dataset_real
 from src.data.simulate_dataset import load_dataset as load_dataset_sim, generate_data 
-from architectures import SimpleCNN, ParticleDetectionUNet
+from architectures import SimpleCNN
+
 
 
 
@@ -51,35 +52,11 @@ def train(model, dataloader, num_epochs=1, learning_rate=0.001, save_model = Fal
         # Save the final model
         save_path = os.path.join(os.getcwd(), 'models')
         final_model_path = os.path.join(save_path, f'{model_name}.pth')
-        #torch.save({
-        #'model_state_dict': model.state_dict(),
-        #'model_architecture': architecture},
-        #final_model_path)
         torch.save(model.state_dict(), final_model_path)
         print(f"Model '{model_name}' saved at {final_model_path}")
 
     return train_loss_history
 
-
-def visualize_output(model, sample_image, sample_mask):
-    model.eval()
-    with torch.no_grad():
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        sample_image = sample_image.unsqueeze(0).to(device)
-        output = model(sample_image)
-        output = output.squeeze(0)
-    if save_model:
-        # Save the final model
-        save_path = os.path.join(os.getcwd(), 'models')
-        final_model_path = os.path.join(save_path, f'{model_name}.pth')
-        #torch.save({
-        #'model_state_dict': model.state_dict(),
-        #'model_architecture': architecture},
-        #final_model_path)
-        torch.save(model.state_dict(), final_model_path)
-        print(f"Model '{model_name}' saved at {final_model_path}")
-
-    return train_loss_history
 
 
 def visualize_output(model, sample_image, sample_mask):
@@ -117,32 +94,15 @@ def visualize_output(model, sample_image, sample_mask):
 if __name__ == "__main__":
     
     data_dir = 'particle_tracking_02456/data/'
-    data_loader = load_dataset_sim(data_dir, 4)
-
-    model = SimpleCNN()
-    #model = ParticleDetectionUNet()
-    train(model, data_loader, num_epochs=1, save_model = False, model_name='Simple_CNN')
-    
-    
-    #visualize the model output for a new image
-    sample_image, sample_mask = generate_data()
-    
-    visualize_output(model, sample_image, sample_mask)
-
-
-
-
-if __name__ == "__main__":
-    
-    data_dir = 'C:/Users/farim/Desktop/particle_tracking_02456/data/'
-    data_loader = load_dataset(data_dir, 4)
+    data_loader = load_dataset_sim(data_dir, 10)
 
     model = SimpleCNN()
     #model = ParticleDetectionUNet()
     train(model, data_loader, num_epochs=1, save_model = True, model_name='Simple_CNN')
     
-    
     #visualize the model output for a new image
     sample_image, sample_mask = generate_data()
     
     visualize_output(model, sample_image, sample_mask)
+
+

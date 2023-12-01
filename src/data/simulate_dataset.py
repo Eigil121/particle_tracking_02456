@@ -2,12 +2,16 @@ import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader
 import os
+import random
+from PIL import Image
+
+
 
 #load the data with os
 #CamDataNormalizedCumalative = torch.from_numpy(np.load(os.path.join(os.getcwd(), 'data', 'CamDataNormalizedCumalative.npy')))
 #CamDataNormalizedCumalative = torch.from_numpy(np.load('CamDataNormalizedCumalative.npy'))
-CamDataNormalizedCumalative = torch.from_numpy(np.load(os.path.join(os.getcwd(), 'data', 'CamDataNormalizedCumalative.npy')))
-ParticleZoo = torch.from_numpy(np.load(os.path.join(os.getcwd(), 'data', 'ParticleZoo.npy')))
+CamDataNormalizedCumalative = torch.from_numpy(np.load(os.path.join(os.getcwd(), 'src/data', 'CamDataNormalizedCumalative.npy')))
+ParticleZoo = torch.from_numpy(np.load(os.path.join(os.getcwd(), 'src/data', 'ParticleZoo.npy')))
 #ParticleZoo = torch.from_numpy(np.load('src/data/ParticleZoo.npy'))
 ParticleBoxSize = 14
 NParticlesZoo = int(np.floor((ParticleZoo.shape[1])/ParticleBoxSize))
@@ -33,7 +37,7 @@ def AddParticle(SimDomain,pos,ZooId):
     Nx=len(SimDomain[:,0])
     Ny=len(SimDomain[0,:])
     #print(Nx,Ny)
-    img2_path = 'data/interim/batch1/cam0/B00002.im7.png'
+    img2_path = 'data/interim/batch1/cam0/B00002.png'
     img2 = Image.open(img2_path)
     img2 = np.array(img2)
     # ParticleZoo = np.zeros((ParticleBoxSize,ParticleBoxSize*NParticlesZoo))
@@ -124,7 +128,7 @@ def generate_images(num_images=5, x_dim=100, y_dim=100, NParticles=100, gauss_pa
 
 
 num_images = 5
-generate_data = lambda: generate_images(num_images=num_images, x_dim=100, y_dim=100, num_gaussians=100, gauss_params=(50, 1), meanflow=15)
+generate_data = lambda: generate_images(num_images=num_images, x_dim=100, y_dim=100, NParticles=100, gauss_params=(50, 1), meanflow=15)
 
 class CustomDataset(Dataset):
     def __init__(self, root, transform=None):
