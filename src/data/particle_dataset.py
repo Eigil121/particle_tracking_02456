@@ -8,7 +8,7 @@ from torchvision import transforms
 import os
 import re
 
-class Particle_dataset(Dataset):
+class Particle_dataset_inference(Dataset):
     def __init__(self, data_dir, transform=None):
         self.transform = transform
 
@@ -61,6 +61,8 @@ class Particle_dataset_supervised(Dataset):
         mask_paths = glob.glob("data/interim/masks/batch*cam*_image*.png" ) # Find all masks
         pattern = re.compile(r"batch(\d+)_cam(\d+)_image(\d+).png") # Define pattern
 
+        mask_paths = mask_paths[1:] # Remove Joachim's mask
+
         self.image_info = []
         for mask_path in mask_paths:
             match = pattern.search(mask_path)
@@ -104,11 +106,6 @@ class Particle_dataset_supervised(Dataset):
         return image_series, mask
 
 
-Particle_dataset_inference = Particle_dataset
-
-
-
-
 def load_dataset(data_dir, batch_size, dataset_type = "supervised"):
 
     if dataset_type == "inference":
@@ -118,7 +115,7 @@ def load_dataset(data_dir, batch_size, dataset_type = "supervised"):
         dataset = Particle_dataset_supervised(data_dir, transform=None)
     
     else:
-        dataset = Particle_dataset(data_dir, transform=None)
+        Particle_dataset_inference(data_dir, transform=None)
 
     # Create a DataLoader for your custom dataset
     custom_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
