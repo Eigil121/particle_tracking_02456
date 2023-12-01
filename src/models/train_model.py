@@ -4,13 +4,33 @@ import torch.optim as optim
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-#from torch.utils.data import 
 from src.data.particle_dataset import load_dataset as load_dataset_real
 from src.data.simulate_dataset import load_dataset as load_dataset_sim, generate_data 
 from architectures import SimpleCNN
+import argparse
+import yaml
 
+def load_model(model_name, architecture):
+    if architecture == 'SimpleCNN':
+        model = SimpleCNN()
+    else:
+        raise ValueError('model architecture not recognized')
 
+    if model_name + '.pth' in os.listdir('models'):
+        state_dict = torch.load("models/" + model_name + '.pth')
+        model.load_state_dict(state_dict)
+        print(f"Model '{model_name}' loaded")
+    
+    else:
+        print(f"New model, '{model_name}', created")
 
+    return model
+
+def save_model(model, model_name):
+    save_path = os.path.join(os.getcwd(), 'models')
+    final_model_path = os.path.join(save_path, f'{model_name}.pth')
+    torch.save(model.state_dict(), final_model_path)
+    print(f"Model '{model_name}' saved at {final_model_path}")
 
 def train(model, dataloader, num_epochs=1, learning_rate=0.001, save_model = False, model_name='final_model'):
     # Move model to device (CPU/GPU)
@@ -48,14 +68,8 @@ def train(model, dataloader, num_epochs=1, learning_rate=0.001, save_model = Fal
             # Append current loss to history
             train_loss_history.append(loss.item())
 
-    if save_model:
-        # Save the final model
-        save_path = os.path.join(os.getcwd(), 'models')
-        final_model_path = os.path.join(save_path, f'{model_name}.pth')
-        torch.save(model.state_dict(), final_model_path)
-        print(f"Model '{model_name}' saved at {final_model_path}")
 
-    return train_loss_history
+    return train_loss_history, model
 
 
 
@@ -91,18 +105,57 @@ def visualize_output(model, sample_image, sample_mask):
 
 
 
-if __name__ == "__main__":
-    
-    data_dir = 'particle_tracking_02456/data/'
-    data_loader = load_dataset_sim(data_dir, 10)
+def main():
+    parser = argparse.ArgumentParser(description='Train the model.')
+    parser.add_argument('config', type=str, help='Experiment name.')
+    args = parser.parse_args()
 
-    model = SimpleCNN()
-    #model = ParticleDetectionUNet()
-    train(model, data_loader, num_epochs=1, save_model = True, model_name='Simple_CNN')
+    # Load the yaml configuration file
+    experiment_configs = yaml.load(open("src/experiments/"+ args.config + ".yaml"), Loader=yaml.FullLoader)
     
+    # Load dataset
+    if experiment_configs['data']['dataset'] == 'simulate':
+        data_loader = load_dataset_sim(experiment_configs['data']['batch_size'])
+    
+    elif experiment_configs['data']['dataset'] == 'inference':
+        data_loader = load_dataset_real(experiment_configs['data']['batch_size'], dataset_type = "inference")
+    
+    elif experiment_configs['data']['dataset'] == 'supervised':
+        data_loader = load_dataset_real(experiment_configs['data']['batch_size'], dataset_type = "supervised")
+    
+    else:
+        raise ValueError('dataset type not recognized')
+
+    # Load model
+    model = load_model(experiment_configs['model']['model_name'], experiment_configs['model']['architecture'])
+    
+    # Give kwargs to train function
+    kwargs = {"num_epochs": experiment_configs['training']['epochs'], "learning_rate": experiment_configs['model']['learning_rate']}
+    
+    # Train model
+    training_history, model = train(model, data_loader, save_model = True, model_name='Simple_CNN', **kwargs)
+    
+    # Plot training history
+    plt.figure()
+    plt.plot(training_history)
+    plt.xlabel("Iterations")
+    plt.ylabel("Loss")
+    plt.title("Training History")
+    plt.show()
+
+    # Save model
+    if experiment_configs['model']['save_name'] == None or experiment_configs['model']['savename'] == "None":
+        save_name = experiment_configs['model']['model_name']
+    else:
+        save_name = experiment_configs['model']['savename']
+
+    save_model(model, save_name)
+
     #visualize the model output for a new image
     sample_image, sample_mask = generate_data()
     
     visualize_output(model, sample_image, sample_mask)
 
 
+if __name__ == "__main__":
+    main()

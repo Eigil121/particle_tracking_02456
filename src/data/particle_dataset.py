@@ -106,16 +106,16 @@ class Particle_dataset_supervised(Dataset):
         return image_series, mask
 
 
-def load_dataset(data_dir, batch_size, dataset_type = "supervised"):
+def load_dataset(batch_size, dataset_type = "supervised"):
 
     if dataset_type == "inference":
-        dataset = Particle_dataset_inference(data_dir, transform=None)
+        dataset = Particle_dataset_inference(transform=None)
 
     elif dataset_type == "supervised":
-        dataset = Particle_dataset_supervised(data_dir, transform=None)
+        dataset = Particle_dataset_supervised(transform=None)
     
     else:
-        Particle_dataset_inference(data_dir, transform=None)
+        Particle_dataset_inference(transform=None)
 
     # Create a DataLoader for your custom dataset
     custom_dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)

@@ -147,7 +147,7 @@ class CustomDataset(Dataset):
 
 
 
-def load_dataset(data_dir, batch_size, dataset_type = None):
+def load_dataset(batch_size, dataset_type = None):
 
     # dataset_type is a placeholder for now. It is used for different model types, i.e. supervised, unsupervised, etc.
 

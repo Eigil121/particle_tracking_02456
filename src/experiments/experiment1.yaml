@@ -1,0 +1,20 @@
+# deep_learning_experiment_config.yaml
+
+experiment_name: firstYaml
+
+# Data configuration
+data:
+  dataset: simulate # simulate, inference, supervised
+  batch_size: 20
+
+# Model configuration
+model:
+  model_name: "CNN1"
+  architecture: SimpleCNN # SimpleCNN
+  learning_rate: 0.001
+  savename: None
+
+# Training configuration
+training:
+  epochs: 1
+
