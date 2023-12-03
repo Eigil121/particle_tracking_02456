@@ -49,8 +49,8 @@ class Particle_dataset_inference(Dataset):
         if self.transform:
             image_series = self.transform(image_series)
 
-
-        return image_series, ((torch.rand_like(image_series[2,:,:]).unsqueeze(0) > 0.95)*1.0) * 1.0 # TODO: Add labels
+        sample_info = {"batch": sample[0], "camera": sample[1], "image": sample[2]}
+        return image_series, torch.zeros_like(image_series[2,:,:]).unsqueeze(0), sample_info
 
 
 
@@ -102,8 +102,7 @@ class Particle_dataset_supervised(Dataset):
             image_series = self.transform(image_series)
             mask = self.transform(mask)
 
-
-        return image_series, mask
+        return image_series, mask, sample_info
 
 
 def load_dataset(batch_size, dataset_type = "supervised"):

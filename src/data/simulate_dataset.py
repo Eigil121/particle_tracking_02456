@@ -143,7 +143,7 @@ class CustomDataset(Dataset):
         
         image_series, mask = generate_data()
 
-        return image_series, mask # TODO: Add labels
+        return image_series, mask, {"batch": 0, "camera": "x", "image": "x"}
 
 
 

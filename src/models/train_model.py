@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 from src.data.particle_dataset import load_dataset as load_dataset_real
-from src.data.simulate_dataset import load_dataset as load_dataset_sim, generate_data 
+from src.data.simulate_dataset import load_dataset as load_dataset_sim 
 from architectures import *
 import argparse
 import yaml
@@ -50,7 +50,7 @@ def save_model(model, model_name):
     torch.save(model.state_dict(), final_model_path)
     print(f"Model '{model_name}' saved at {final_model_path}")
 
-def train(model, dataloader, num_epochs=1, learning_rate=0.001, save_model = False, model_name='final_model'):
+def train(model, dataloader, num_epochs=1, learning_rate=0.001):
     # Move model to device (CPU/GPU)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
@@ -66,7 +66,7 @@ def train(model, dataloader, num_epochs=1, learning_rate=0.001, save_model = Fal
     for epoch in range(num_epochs):
         model.train()
 
-        for i, (images, labels) in enumerate(dataloader):
+        for i, (images, labels, image_info) in enumerate(dataloader):
             images, labels = images.to(device), labels.to(device)
 
 
@@ -91,38 +91,6 @@ def train(model, dataloader, num_epochs=1, learning_rate=0.001, save_model = Fal
 
 
 
-def visualize_output(model, sample_image, sample_mask):
-    model.eval()
-    with torch.no_grad():
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        sample_image = sample_image.unsqueeze(0).to(device)
-        output = model(sample_image)
-        output = output.squeeze(0)
-
-    sample_image = sample_image.squeeze(0)
-    sample_image = sample_image.to('cpu')
-    output = output.to('cpu')
-
-
-    # Plot the model output
-    plt.figure()
-    plt.subplot(1, 3, 1)
-    plt.imshow(sample_image[2].numpy(), cmap='gray')
-    plt.title("Input Image")
-    plt.axis('off')
-    plt.subplot(1, 3, 2)
-    plt.imshow(output[0].numpy(), cmap='gray')
-    plt.title("Output Probability Map")
-    plt.axis('off')
-    plt.subplot(1, 3, 3)
-    plt.imshow(sample_mask[0].numpy(), cmap='gray')
-    plt.title("Input Mask")
-    plt.axis('off')
-    plt.show()
-
-
-
-
 def main():
     parser = argparse.ArgumentParser(description='Train the model.')
     parser.add_argument('config', type=str, help='Experiment name.')
@@ -144,42 +112,45 @@ def main():
     kwargs = {"num_epochs": experiment_configs['training']['epochs'], "learning_rate": experiment_configs['model']['learning_rate']}
     
     # Train model
-    training_history, model = train(model, data_loader, save_model = True, model_name='Simple_CNN', **kwargs)
+    training_history, model = train(model, data_loader, **kwargs)
     
-    # Plot training history
-    plt.figure()
-    plt.plot(training_history)
-    plt.xlabel("Iterations")
-    plt.ylabel("Loss")
-    plt.title("Training History")
-    plt.show()
+    if experiment_configs['training']['epochs'] > 2:
+        # Plot training history
+        plt.figure()
+        plt.plot(training_history)
+        plt.xlabel("Iterations")
+        plt.ylabel("Loss")
+        plt.title("Training History")
+        plt.show()
 
     # Save model
-    if experiment_configs['model']['savename'] == None or experiment_configs['model']['savename'] == "None":
+    if experiment_configs['model']['savename'] in [None, "None"]:
         save_name = experiment_configs['model']['model_name']
     else:
         save_name = experiment_configs['model']['savename']
 
     save_model(model, save_name)
     
-    #visualize_output(model, sample_image, sample_mask)
+
+    # Visualize output
     if experiment_configs['visualize']["plot"]:
         from src.visualization.visualize import visualize_output
 
         dataset_name = experiment_configs['visualize']['dataset']
-        batch_size = experiment_configs['visualize']['n_max']
+        n_max = experiment_configs['visualize']['n_max']
 
         # Load dataset
-        data_loader = load_dataset(batch_size, dataset_name)
+        data_loader = load_dataset(n_max, dataset_name)
 
-        sample_image, sample_mask = next(iter(data_loader))
+        sample_image, sample_mask, image_info = next(iter(data_loader))
         model.eval()
 
         with torch.no_grad():
+            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            sample_image = sample_image.to(device)
             output = model(sample_image)
 
-        n_max = experiment_configs['visualize']['n_max']
-        visualize_output(sample_image, sample_mask, output, nmax=batch_size)
+        visualize_output(sample_image, sample_mask, output, image_info, nmax=n_max)
 
 
         

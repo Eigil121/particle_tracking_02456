@@ -6,7 +6,7 @@ from src.models.architectures import SimpleCNN
 from src.data.particle_dataset import load_dataset as load_dataset_real
 
 
-def visualize_output(input, mask, prediction, nmax=3):
+def visualize_output(input, mask, prediction, image_info=None, nmax=3):
 
     with torch.no_grad():
         input = input.clone().detach().to('cpu').numpy()
@@ -17,6 +17,8 @@ def visualize_output(input, mask, prediction, nmax=3):
 
     for i in range(N):
         plt.figure()
+        if image_info is not None:
+            plt.suptitle(f"Batch: {image_info['batch'][i]}, Camera: {image_info['camera'][i]}, Image: {image_info['image'][i]}")
         plt.subplot(3, 1, 1)
         plt.imshow(input[i, 2, :, :], cmap='gray')
         plt.title("Input Image")
@@ -53,15 +55,15 @@ if __name__ == "__main__":
     
     if data == "simulate":
         data_loader = load_dataset_sim(1)
-        sample_image, sample_mask = next(iter(data_loader))
+        sample_image, sample_mask, image_info = next(iter(data_loader))
   
 
     elif data == "real":
         data_loader = load_dataset_real(1)
-        sample_image, sample_mask = next(iter(data_loader))
+        sample_image, sample_mask, image_info = next(iter(data_loader))
 
     output = model(sample_image)
 
 
-    visualize_output(sample_image, sample_mask, output)
+    visualize_output(sample_image, sample_mask, output, image_info)
 

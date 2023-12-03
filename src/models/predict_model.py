@@ -26,7 +26,7 @@ def predict_model(model_name, dataloader):
     outputs = []
 
     # Run model on data
-    for i, (images, labels) in enumerate(dataloader):
+    for i, (images, labels, image_info) in enumerate(dataloader):
         images, labels = images.to(device), labels.to(device)
 
         with torch.no_grad():
