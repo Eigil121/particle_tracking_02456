@@ -6,7 +6,7 @@ import numpy as np
 import os
 from src.data.particle_dataset import load_dataset as load_dataset_real
 from src.data.simulate_dataset import load_dataset as load_dataset_sim 
-from architectures import *
+from src.models.architectures import *
 import argparse
 import yaml
 
