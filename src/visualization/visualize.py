@@ -15,6 +15,8 @@ def visualize_output(input, mask, prediction, image_info=None, nmax=3):
 
     N = input.shape[0]
 
+    input = np.clip(input, 0, 0.5)
+
     for i in range(N):
         plt.figure()
         if image_info is not None:

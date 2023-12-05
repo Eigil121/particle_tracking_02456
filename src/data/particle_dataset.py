@@ -61,8 +61,6 @@ class Particle_dataset_supervised(Dataset):
         mask_paths = glob.glob("data/interim/masks/batch*cam*_image*.png" ) # Find all masks
         pattern = re.compile(r"batch(\d+)_cam(\d+)_image(\d+).png") # Define pattern
 
-        mask_paths = mask_paths[1:] # Remove Joachim's mask
-
         self.image_info = []
         for mask_path in mask_paths:
             match = pattern.search(mask_path)
@@ -133,7 +131,7 @@ if __name__ == "__main__":
     data_dir = 'data/interim/'
     data_loader = load_dataset(1, dataset_type = "supervised")
 
-    for i, (images, labels) in enumerate(data_loader):
+    for i, (images, labels, image_info) in enumerate(data_loader):
         print(images.shape)
         print(labels.shape)
         

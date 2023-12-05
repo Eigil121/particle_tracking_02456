@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import matplotlib.pyplot as plt
-import numpy as np
 import os
 from src.data.particle_dataset import load_dataset as load_dataset_real
 from src.data.simulate_dataset import load_dataset as load_dataset_sim 
@@ -47,6 +46,7 @@ def load_model(model_name, architecture):
 def save_model(model, model_name):
     save_path = os.path.join(os.getcwd(), 'models')
     final_model_path = os.path.join(save_path, f'{model_name}.pth')
+    model.to('cpu')
     torch.save(model.state_dict(), final_model_path)
     print(f"Model '{model_name}' saved at {final_model_path}")
 
@@ -147,6 +147,7 @@ def main():
 
         with torch.no_grad():
             device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            model.to(device)
             sample_image = sample_image.to(device)
             output = model(sample_image)
 

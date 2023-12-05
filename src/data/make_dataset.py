@@ -29,10 +29,10 @@ eigil_andreas_json_path = "data/raw/masks/mask_eigil_andreas.json"
 
 # Andreas
 mask = build_mask(eigil_andreas_json_path)
-save_mask(mask, batch=1, camera=2, image_nr=50)
+save_mask(mask, batch=1, camera=3, image_nr=50)
 
 # Eigil
 mask = build_mask(eigil_andreas_json_path, mask_nr=1)
-save_mask(mask, batch=2, camera=3, image_nr=150)
+save_mask(mask, batch=2, camera=2, image_nr=150)
 
 print("Masks updated")
