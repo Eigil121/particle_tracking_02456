@@ -16,6 +16,10 @@ class Particle_dataset_inference(Dataset):
         index_count = 0
 
         batches = [d for d in os.listdir("data/interim/") if not d.startswith('.')]
+        # remove batch 4 if it exists as it only has empty images
+        if "batch4" in batches:
+            batches.remove("batch4")
+
         self.batch_dict = {}
 
         for batch in batches:
@@ -103,6 +107,50 @@ class Particle_dataset_supervised(Dataset):
         return image_series, mask, sample_info
 
 
+
+class Particle_dataset_supervised_eval(Particle_dataset_supervised):
+
+    def __init__(self, transform=None, portion=0.8, train=True):
+        super().__init__(transform)
+        self.portion = portion
+        self.train = train
+
+    def __getitem__(self, idx):
+        # Generate your data here
+        # For example, let's generate a random tensor as data
+
+        image_series, mask, sample_info = super().__getitem__(idx)
+
+        image_length = image_series.shape[2]
+
+        if self.train:
+            image_series = image_series[:, :, :int(image_length*self.portion)]
+            mask = mask[:, :, :int(image_length*self.portion)]
+        else:
+            image_series = image_series[:, :, int(image_length*self.portion):]
+            mask = mask[:, :, int(image_length*self.portion):]
+
+        return image_series, mask, sample_info
+
+class Particle_dataset_unsupervised(Particle_dataset_inference):
+    def __init__(self, transform=None):
+        super().__init__(transform)
+        self.transform = transform
+    
+
+    def __getitem__(self, idx):
+        
+        image_series, _, sample_info = super().__getitem__(idx)
+
+        # make middle image the label
+
+        label = image_series[2, :, :].unsqueeze(0)
+
+        # Remove middle image from image series
+        image_series = torch.cat((image_series[:2, :, :], image_series[3:, :, :]), dim=0)
+
+        return image_series, label, sample_info
+
 def load_dataset(batch_size, dataset_type = "supervised"):
 
     if dataset_type == "inference":
@@ -110,6 +158,15 @@ def load_dataset(batch_size, dataset_type = "supervised"):
 
     elif dataset_type == "supervised":
         dataset = Particle_dataset_supervised(transform=None)
+    
+    elif dataset_type == "train":
+        dataset = Particle_dataset_supervised_eval(transform=None, train=True)
+    
+    elif dataset_type == "eval":
+        dataset = Particle_dataset_supervised_eval(transform=None, train=False)
+    
+    elif dataset_type == "unsupervised":
+        dataset = Particle_dataset_unsupervised(transform=None)
     
     else:
         Particle_dataset_inference(transform=None)
@@ -129,7 +186,7 @@ if __name__ == "__main__":
 
     # Test the dataset
     data_dir = 'data/interim/'
-    data_loader = load_dataset(1, dataset_type = "supervised")
+    data_loader = load_dataset(1, dataset_type = "unsupervised")
 
     for i, (images, labels, image_info) in enumerate(data_loader):
         print(images.shape)
