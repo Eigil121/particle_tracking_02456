@@ -31,7 +31,7 @@ def visualize_output(input, mask, prediction, image_info=None, nmax=3):
         plt.axis('off')
         plt.subplot(3, 1, 3)
         plt.imshow(mask[i, 0, :, :], cmap='gray')
-        plt.title("Input Mask")
+        plt.title("Ground truth")
         plt.axis('off')
         plt.show()
 

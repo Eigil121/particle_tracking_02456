@@ -6,8 +6,11 @@ import os
 from src.data.particle_dataset import load_dataset as load_dataset_real
 from src.data.simulate_dataset import load_dataset as load_dataset_sim 
 from src.models.architectures import *
+from src.models.unet_model import UNet as UNetmodel
+UNet = lambda: UNetmodel(n_channels=4, n_classes=1, bilinear=True)
 import argparse
 import yaml
+import numpy as np
 
 def load_dataset(batch_size, dataset_name):
     
@@ -21,6 +24,15 @@ def load_dataset(batch_size, dataset_name):
     elif dataset_name == 'supervised':
         data_loader = load_dataset_real(batch_size, dataset_type="supervised")
     
+    elif dataset_name == 'train':
+        data_loader = load_dataset_real(batch_size, dataset_type="train")
+    
+    elif dataset_name == 'eval':
+        data_loader = load_dataset_real(batch_size, dataset_type="eval")
+    
+    elif dataset_name == 'unsupervised':
+        data_loader = load_dataset_real(batch_size, dataset_type="unsupervised")
+    
     else:
         raise ValueError('dataset type not recognized')
     
@@ -30,7 +42,8 @@ def load_model(model_name, architecture):
     try:
         model = eval(architecture + "()")
 
-    except:
+    except Exception as e:
+        print(e)
         raise ValueError('model architecture not recognized')
 
     if model_name + '.pth' in os.listdir('models'):
@@ -50,18 +63,23 @@ def save_model(model, model_name):
     torch.save(model.state_dict(), final_model_path)
     print(f"Model '{model_name}' saved at {final_model_path}")
 
-def train(model, dataloader, num_epochs=1, learning_rate=0.001):
+def train(model, dataloader, num_epochs=1, learning_rate=0.001, loss = "BCE"):
     # Move model to device (CPU/GPU)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
 
     # Define loss function and optimizer
     #criterion = nn.BCEWithLogitsLoss()
-    criterion = nn.BCELoss()
+    if loss == "BCE":
+        criterion = nn.BCELoss()
+    elif loss == "MSE":
+        criterion = nn.MSELoss() # Used as reconstruction loss for unsupervised training
+    
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     # Training loop
     train_loss_history = []
+    val_loss_history = []
 
     for epoch in range(num_epochs):
         model.train()
@@ -85,9 +103,22 @@ def train(model, dataloader, num_epochs=1, learning_rate=0.001):
 
             # Append current loss to history
             train_loss_history.append(loss.item())
+        
+        if epoch % 10 == 0:
+            
+            model.eval()
+            with torch.no_grad():
+                test_loader = load_dataset(2, dataset_name = "eval")
+                for i, (images, labels, image_info) in enumerate(test_loader):
+                    images, labels = images.to(device), labels.to(device)
+                    outputs = model(images)
+                    loss = criterion(outputs, labels)
+                    val_loss_history.append(float(loss.item()))
+            model.train()
+                
 
 
-    return train_loss_history, model
+    return train_loss_history, val_loss_history, model
 
 
 
@@ -109,18 +140,21 @@ def main():
     model = load_model(experiment_configs['model']['model_name'], experiment_configs['model']['architecture'])
     
     # Give kwargs to train function
-    kwargs = {"num_epochs": experiment_configs['training']['epochs'], "learning_rate": experiment_configs['model']['learning_rate']}
+    kwargs = {"num_epochs": experiment_configs['training']['epochs'], "learning_rate": experiment_configs['model']['learning_rate'], "loss": experiment_configs['model']['loss']}
     
     # Train model
-    training_history, model = train(model, data_loader, **kwargs)
+    training_history, val_loss_history, model = train(model, data_loader, **kwargs)
     
     if experiment_configs['training']['epochs'] > 2:
         # Plot training history
         plt.figure()
-        plt.plot(training_history)
+        plt.plot(training_history, label="Training Loss")
+        plt.plot(np.arange(len(val_loss_history))*10, val_loss_history, label="Validation Loss", color="orange")
         plt.xlabel("Iterations")
         plt.ylabel("Loss")
         plt.title("Training History")
+        plt.legend()
+        plt.savefig("reports/figures/" + experiment_configs['model']['model_name'] + "_training_history.png")
         plt.show()
 
     # Save model
